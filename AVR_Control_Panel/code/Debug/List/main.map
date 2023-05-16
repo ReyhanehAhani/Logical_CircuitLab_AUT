@@ -1,0 +1,42 @@
+RAM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+PASSWORD                                                                          0x0219       4
+digits                                                                            0x021D      10
+_base_y                                                                           0x0227       4
+
+EEPROM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+Register Allocation
+Variable                                                                          Register  Size
+------------------------------------------------------------------------------------------------
+entered_menu                                                                      R5           1
+menu_number                                                                       R4           1
+logged_in                                                                         R7           1
+i                                                                                 R6           1
+n                                                                                 R9           1
+t                                                                                 R8           1
+_lcd_x                                                                            R11          1
+_lcd_y                                                                            R10          1
+_lcd_maxx                                                                         R13          1
+
+FLASH Allocation [words]
+Function                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+ext_int0_isr                                                                      0x000C2     14
+ext_int1_isr                                                                      0x000D0     34
+main                                                                              0x000F2    146
+get_key                                                                           0x00184     81
+verify_password                                                                   0x001D5     76
+led_action                                                                        0x00221      4
+buzzer_action                                                                     0x00225      4
+relay_action                                                                      0x00229      4
+_lcd_write_nibble_G100                                                            0x0022D     20
+_lcd_write_data                                                                   0x00241     12
+lcd_gotoxy                                                                        0x0024D     13
+lcd_clear                                                                         0x0025A     10
+lcd_putchar                                                                       0x00264     21
+lcd_puts                                                                          0x00279     17
+lcd_init                                                                          0x0028A     43

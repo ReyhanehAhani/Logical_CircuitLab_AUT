@@ -1,0 +1,304 @@
+#include <mega16a.h>
+#include <alcd.h>
+#include <delay.h>
+
+const char PASSWORD[] = { '1', '2', '3', '4' };
+const unsigned char digits[] = { 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x67 };
+
+char get_key();
+unsigned char verify_password();
+
+unsigned char menu_number = 0, old_menu_number = 4, i = 0, n = 0, pass = 0, task = 0;
+unsigned int loop_count = 0, task_run = 0;
+bit t = 0, logged_in = 0;
+
+interrupt[EXT_INT0] void ext_int0_isr(void)
+{
+	if (logged_in == 0)
+		return;
+
+	n++;
+	if (n > 99)
+		n = 0;
+}
+
+interrupt[EXT_INT1] void ext_int1_isr(void)
+{
+	if (logged_in == 0)
+		return;
+
+	n--;
+	if (n > 99)
+		n = 0;
+}
+
+void main(void)
+{
+	DDRC = 0x0F;
+	PORTC = 0b11110000;
+
+	DDRD = 0b01110000;
+	PORTD = 0b00000011;
+
+	DDRA = 0xFF;
+	DDRB.3 = 1;
+
+    //INT
+	GICR |= (1 << INT1) | (1 << INT0) | (0 << INT2);
+	MCUCR = (1 << ISC11) | (1 << ISC10) | (1 << ISC01) | (0 << ISC00);
+	MCUCSR = (0 << ISC2);
+	GIFR = (1 << INTF1) | (1 << INTF0) | (0 << INTF2);
+	#asm("sei")
+
+	lcd_init(16);
+
+	while (1)
+	{
+        lcd_clear();
+		lcd_puts("Enter passwrod: ");
+
+        pass = verify_password();
+
+        if(pass == 1)
+            break;
+        
+		if (pass == 0)
+		{
+			lcd_clear();
+			lcd_puts("INCORRECT PASSWORD");
+			delay_ms(300);
+		}
+	}
+
+	lcd_clear();
+	lcd_puts("Correct Password");
+	delay_ms(300);
+	lcd_clear();
+
+	logged_in = 1;
+	menu_number = 1;
+
+	while (1)
+	{
+		if (t == 0)
+		{
+			PORTA = digits[n / 10];
+			t = 1;
+			PORTA.7 = 0;
+			PORTB.3 = 1;
+		}
+		else if (t == 1)
+		{
+			PORTA = digits[n % 10];
+			t = 0;
+			PORTA.7 = 1;
+			PORTB.3 = 0;
+		}
+
+		if (old_menu_number != menu_number)
+		{
+			old_menu_number = menu_number;
+			switch (menu_number)
+			{
+				case 1:
+					lcd_clear();
+					lcd_puts("1)LED<=\n2)Buzzer");
+					break;
+				case 2:
+					lcd_clear();
+					lcd_puts("1)LED\n2)Buzzer<=");
+					break;
+				case 3:
+					lcd_clear();
+					lcd_puts("3)Relay<=");
+					break;
+			}
+		}
+
+		if (PIND.0 == 0 && (loop_count % 15 == 0))
+		{
+			menu_number++;
+			if (menu_number > 3)
+			{
+				menu_number = 1;
+			}
+		}
+
+		if (PIND.1 == 0 && (loop_count % 15 == 0) && task == 0)
+		{
+			old_menu_number = 4;
+			task = menu_number;
+		}
+
+		if (PIND.7 == 1  && (loop_count % 15 == 0))
+		{
+			n++;
+			if (n > 99)
+				n = 0;
+		}
+
+        if(task != 0)
+        {
+            task_run++;
+            switch (task)
+            {
+                case 1:
+                    PORTD.4 = 1;
+                case 2:
+                    PORTD.5 = 1;
+                case 3:
+                    PORTD.6 = 1;
+            }
+            
+            if(task_run == 40)
+            {
+                task_run = 0;
+                task = 0;
+                PORTD.4 = 0;
+                PORTD.5 = 0;
+                PORTD.6 = 0;
+            }
+        }
+
+		loop_count++;
+        delay_ms(25);
+
+	}
+}
+
+char get_key(void)
+{
+	while (1)
+	{
+		PORTC.0 = 0;
+		PORTC.1 = 1;
+		PORTC.2 = 1;
+		PORTC.3 = 1;
+		if (PINC.4 == 0)
+		{
+			return '1';
+		}
+
+		if (PINC.5 == 0)
+		{
+			return '2';
+		}
+
+		if (PINC.6 == 0)
+		{
+			return '3';
+		}
+
+		if (PINC.7 == 0)
+		{
+			return 'A';
+		}
+
+		PORTC.0 = 1;
+		PORTC.1 = 0;
+		PORTC.2 = 1;
+		PORTC.3 = 1;
+		if (PINC.4 == 0)
+		{
+			return '4';
+		}
+
+		if (PINC.5 == 0)
+		{
+			return '5';
+		}
+
+		if (PINC.6 == 0)
+		{
+			return '6';
+		}
+
+		if (PINC.7 == 0)
+		{
+			return 'B';
+		}
+
+		PORTC.0 = 1;
+		PORTC.1 = 1;
+		PORTC.2 = 0;
+		PORTC.3 = 1;
+		if (PINC.4 == 0)
+		{
+			return '7';
+		}
+
+		if (PINC.5 == 0)
+		{
+			return '8';
+		}
+
+		if (PINC.6 == 0)
+		{
+			return '9';
+		}
+
+		if (PINC.7 == 0)
+		{
+			return 'C';
+		}
+
+		PORTC.0 = 1;
+		PORTC.1 = 1;
+		PORTC.2 = 1;
+		PORTC.3 = 0;
+		if (PINC.4 == 0)
+		{
+			return '*';
+		}
+
+		if (PINC.5 == 0)
+		{
+			return '0';
+		}
+
+		if (PINC.6 == 0)
+		{
+			return '#';
+		}
+
+		if (PINC.7 == 0)
+		{
+			return 'D';
+		}
+	}
+}
+
+unsigned char verify_password()
+{
+	unsigned char input[4];
+	char temp;
+
+	for (i = 0; i <= 3; i++)
+	{
+		temp = get_key();
+		lcd_putchar(temp);
+		input[i] = temp;
+		delay_ms(500);
+		if (temp == '*')
+		{
+			lcd_clear();
+			lcd_puts("Enter passwrod: ");
+			return 2;
+		}
+	}
+
+	for (i = 0; i <= 3; i++)
+	{
+		if (input[i] == PASSWORD[i])
+		{
+			temp = 1;
+		}
+		else
+		{
+			temp = 0;
+			return temp;
+		}
+	}
+
+	return temp;
+}
