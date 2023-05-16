@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2019.1 (64-bit)
+# SW Build 2552052 on Fri May 24 14:49:42 MDT 2019
+# IP Build 2548770 on Fri May 24 18:01:18 MDT 2019
+# Start of session at: Mon Jul 12 20:11:36 2021
+# Process ID: 3656
+# Current directory: F:/vhdl/pjrs/pjr1/project_8/project_8.runs/synth_1
+# Command line: vivado.exe -log MAIN.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source MAIN.tcl
+# Log file: F:/vhdl/pjrs/pjr1/project_8/project_8.runs/synth_1/MAIN.vds
+# Journal file: F:/vhdl/pjrs/pjr1/project_8/project_8.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
+source MAIN.tcl -notrace
